@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
+import { getStatistics } from '@/lib/turso-helpers';
 
 // GET /api/statistics - Get system statistics
 export async function GET(request: Request) {
@@ -10,19 +10,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ detail: 'Yetkisiz erişim' }, { status: 401 });
     }
 
-    const [teacherCount, courseCount, classroomCount, scheduleCount] = await Promise.all([
-      prisma.teacher.count(),
-      prisma.course.count(),
-      prisma.classroom.count(),
-      prisma.schedule.count(),
-    ]);
-
-    return NextResponse.json({
-      teacherCount,
-      courseCount,
-      classroomCount,
-      scheduleCount,
-    });
+    const stats = await getStatistics();
+    return NextResponse.json(stats);
   } catch (error) {
     console.error('Get statistics error:', error);
     return NextResponse.json(

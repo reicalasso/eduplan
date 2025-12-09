@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
 import { getCurrentUser, isAdmin } from '@/lib/auth';
+import { deleteSchedule } from '@/lib/turso-helpers';
 
 // DELETE /api/schedules/[id] - Delete a schedule
 export async function DELETE(
@@ -14,10 +14,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await prisma.schedule.delete({
-      where: { id: parseInt(id) },
-    });
-
+    await deleteSchedule(parseInt(id));
     return NextResponse.json({ message: 'Program silindi' });
   } catch (error) {
     console.error('Delete schedule error:', error);

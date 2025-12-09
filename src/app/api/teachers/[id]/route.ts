@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
 import { getCurrentUser, isAdmin } from '@/lib/auth';
+import { getTeacherById, updateTeacher, deleteTeacher } from '@/lib/turso-helpers';
 
 // GET /api/teachers/[id] - Get a single teacher
 export async function GET(
@@ -14,23 +14,13 @@ export async function GET(
     }
 
     const { id } = await params;
-    const teacher = await prisma.teacher.findUnique({
-      where: { id: parseInt(id) },
-    });
+    const teacher = await getTeacherById(parseInt(id));
 
     if (!teacher) {
       return NextResponse.json({ detail: 'Öğretmen bulunamadı' }, { status: 404 });
     }
 
-    return NextResponse.json({
-      id: teacher.id,
-      name: teacher.name,
-      email: teacher.email,
-      faculty: teacher.faculty,
-      department: teacher.department,
-      working_hours: teacher.workingHours,
-      is_active: teacher.isActive,
-    });
+    return NextResponse.json(teacher);
   } catch (error) {
     console.error('Get teacher error:', error);
     return NextResponse.json(
@@ -55,26 +45,8 @@ export async function PUT(
     const body = await request.json();
     const { name, email, faculty, department, working_hours } = body;
 
-    const teacher = await prisma.teacher.update({
-      where: { id: parseInt(id) },
-      data: {
-        name,
-        email,
-        faculty,
-        department,
-        workingHours: working_hours || '{}',
-      },
-    });
-
-    return NextResponse.json({
-      id: teacher.id,
-      name: teacher.name,
-      email: teacher.email,
-      faculty: teacher.faculty,
-      department: teacher.department,
-      working_hours: teacher.workingHours,
-      is_active: teacher.isActive,
-    });
+    const teacher = await updateTeacher(parseInt(id), { name, email, faculty, department, working_hours });
+    return NextResponse.json(teacher);
   } catch (error) {
     console.error('Update teacher error:', error);
     return NextResponse.json(
@@ -96,10 +68,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await prisma.teacher.delete({
-      where: { id: parseInt(id) },
-    });
-
+    await deleteTeacher(parseInt(id));
     return NextResponse.json({ message: 'Öğretmen silindi' });
   } catch (error) {
     console.error('Delete teacher error:', error);

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
 import { getCurrentUser, isAdmin } from '@/lib/auth';
+import { getClassroomById, updateClassroom, deleteClassroom, countSchedulesByClassroom } from '@/lib/turso-helpers';
 
 // GET /api/classrooms/[id] - Get a single classroom
 export async function GET(
@@ -14,22 +14,13 @@ export async function GET(
     }
 
     const { id } = await params;
-    const classroom = await prisma.classroom.findUnique({
-      where: { id: parseInt(id) },
-    });
+    const classroom = await getClassroomById(parseInt(id));
 
     if (!classroom) {
       return NextResponse.json({ detail: 'Derslik bulunamadı' }, { status: 404 });
     }
 
-    return NextResponse.json({
-      id: classroom.id,
-      name: classroom.name,
-      capacity: classroom.capacity,
-      type: classroom.type,
-      faculty: classroom.faculty,
-      department: classroom.department,
-    });
+    return NextResponse.json(classroom);
   } catch (error) {
     console.error('Get classroom error:', error);
     return NextResponse.json(
@@ -54,25 +45,8 @@ export async function PUT(
     const body = await request.json();
     const { name, capacity, type, faculty, department } = body;
 
-    const classroom = await prisma.classroom.update({
-      where: { id: parseInt(id) },
-      data: {
-        name,
-        capacity: capacity || 30,
-        type: type || 'teorik',
-        faculty,
-        department,
-      },
-    });
-
-    return NextResponse.json({
-      id: classroom.id,
-      name: classroom.name,
-      capacity: classroom.capacity,
-      type: classroom.type,
-      faculty: classroom.faculty,
-      department: classroom.department,
-    });
+    const classroom = await updateClassroom(parseInt(id), { name, capacity, type, faculty, department });
+    return NextResponse.json(classroom);
   } catch (error) {
     console.error('Update classroom error:', error);
     return NextResponse.json(
@@ -97,10 +71,7 @@ export async function DELETE(
     const classroomId = parseInt(id);
 
     // Check if classroom is used in schedules
-    const scheduleCount = await prisma.schedule.count({
-      where: { classroomId },
-    });
-
+    const scheduleCount = await countSchedulesByClassroom(classroomId);
     if (scheduleCount > 0) {
       return NextResponse.json(
         { detail: 'Bu derslik ders programında kullanılıyor, silinemez' },
@@ -108,10 +79,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.classroom.delete({
-      where: { id: classroomId },
-    });
-
+    await deleteClassroom(classroomId);
     return NextResponse.json({ message: 'Derslik silindi' });
   } catch (error) {
     console.error('Delete classroom error:', error);

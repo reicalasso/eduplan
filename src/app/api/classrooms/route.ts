@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
 import { getCurrentUser, isAdmin } from '@/lib/auth';
+import { getAllClassrooms, findClassroomByNameAndDept, createClassroom } from '@/lib/turso-helpers';
 
 // GET /api/classrooms - Get all classrooms
 export async function GET(request: Request) {
@@ -10,21 +10,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ detail: 'Yetkisiz erişim' }, { status: 401 });
     }
 
-    const classrooms = await prisma.classroom.findMany({
-      orderBy: { name: 'asc' },
-    });
-
-    // Transform to match frontend expected format
-    const result = classrooms.map((c) => ({
-      id: c.id,
-      name: c.name,
-      capacity: c.capacity,
-      type: c.type,
-      faculty: c.faculty,
-      department: c.department,
-    }));
-
-    return NextResponse.json(result);
+    const classrooms = await getAllClassrooms();
+    return NextResponse.json(classrooms);
   } catch (error) {
     console.error('Get classrooms error:', error);
     return NextResponse.json(
@@ -46,9 +33,7 @@ export async function POST(request: Request) {
     const { name, capacity, type, faculty, department } = body;
 
     // Check if classroom already exists in this department
-    const existing = await prisma.classroom.findFirst({
-      where: { name, department },
-    });
+    const existing = await findClassroomByNameAndDept(name, department);
     if (existing) {
       return NextResponse.json(
         { detail: 'Bu derslik zaten bu bölümde mevcut' },
@@ -56,24 +41,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const classroom = await prisma.classroom.create({
-      data: {
-        name,
-        capacity: capacity || 30,
-        type: type || 'teorik',
-        faculty,
-        department,
-      },
-    });
-
-    return NextResponse.json({
-      id: classroom.id,
-      name: classroom.name,
-      capacity: classroom.capacity,
-      type: classroom.type,
-      faculty: classroom.faculty,
-      department: classroom.department,
-    });
+    const classroom = await createClassroom({ name, capacity, type, faculty, department });
+    return NextResponse.json(classroom);
   } catch (error) {
     console.error('Create classroom error:', error);
     return NextResponse.json(

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
 import { getCurrentUser, isAdmin } from '@/lib/auth';
+import { getAllTeachers, findTeacherByEmail, createTeacher } from '@/lib/turso-helpers';
 
 // GET /api/teachers - Get all teachers
 export async function GET(request: Request) {
@@ -10,22 +10,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ detail: 'Yetkisiz erişim' }, { status: 401 });
     }
 
-    const teachers = await prisma.teacher.findMany({
-      orderBy: { name: 'asc' },
-    });
-
-    // Transform to match frontend expected format
-    const result = teachers.map((t) => ({
-      id: t.id,
-      name: t.name,
-      email: t.email,
-      faculty: t.faculty,
-      department: t.department,
-      working_hours: t.workingHours,
-      is_active: t.isActive,
-    }));
-
-    return NextResponse.json(result);
+    const teachers = await getAllTeachers();
+    return NextResponse.json(teachers);
   } catch (error) {
     console.error('Get teachers error:', error);
     return NextResponse.json(
@@ -47,7 +33,7 @@ export async function POST(request: Request) {
     const { name, email, faculty, department, working_hours } = body;
 
     // Check if email already exists
-    const existing = await prisma.teacher.findUnique({ where: { email } });
+    const existing = await findTeacherByEmail(email);
     if (existing) {
       return NextResponse.json(
         { detail: 'Bu e-posta adresi zaten kullanılıyor' },
@@ -55,25 +41,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const teacher = await prisma.teacher.create({
-      data: {
-        name,
-        email,
-        faculty,
-        department,
-        workingHours: working_hours || '{}',
-      },
-    });
-
-    return NextResponse.json({
-      id: teacher.id,
-      name: teacher.name,
-      email: teacher.email,
-      faculty: teacher.faculty,
-      department: teacher.department,
-      working_hours: teacher.workingHours,
-      is_active: teacher.isActive,
-    });
+    const teacher = await createTeacher({ name, email, faculty, department, working_hours });
+    return NextResponse.json(teacher);
   } catch (error) {
     console.error('Create teacher error:', error);
     return NextResponse.json(

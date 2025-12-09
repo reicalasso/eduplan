@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
 import { getCurrentUser, isAdmin } from '@/lib/auth';
+import { getActiveCoursesForScheduler, getAllClassroomsForScheduler, deleteAllSchedules, createManySchedules } from '@/lib/turso-helpers';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const TIME_BLOCKS = [
@@ -225,41 +225,10 @@ export async function POST(request: Request) {
     }
 
     // Get active courses with their data
-    const coursesRaw = await prisma.course.findMany({
-      where: { isActive: true },
-      include: {
-        teacher: true,
-        sessions: true,
-        departments: true,
-      },
-    });
+    const courses: CourseData[] = await getActiveCoursesForScheduler();
 
     // Get all classrooms
-    const classroomsRaw = await prisma.classroom.findMany();
-
-    // Transform data
-    const courses: CourseData[] = coursesRaw.map((c) => ({
-      id: c.id,
-      name: c.name,
-      code: c.code,
-      teacherId: c.teacherId,
-      faculty: c.faculty,
-      level: c.level,
-      totalHours: c.totalHours,
-      sessions: c.sessions.map((s) => ({ type: s.type, hours: s.hours })),
-      departments: c.departments.map((d) => ({
-        department: d.department,
-        studentCount: d.studentCount,
-      })),
-      teacherWorkingHours: c.teacher ? parseWorkingHours(c.teacher.workingHours) : {},
-    }));
-
-    const classrooms: ClassroomData[] = classroomsRaw.map((c) => ({
-      id: c.id,
-      name: c.name,
-      capacity: c.capacity,
-      type: c.type,
-    }));
+    const classrooms: ClassroomData[] = await getAllClassroomsForScheduler();
 
     if (courses.length === 0) {
       return NextResponse.json({
@@ -295,21 +264,19 @@ export async function POST(request: Request) {
     }
 
     // Delete existing schedules
-    await prisma.schedule.deleteMany();
+    await deleteAllSchedules();
 
     // Generate new schedule
     const { schedule, unscheduled } = await generateScheduleGenetic(courses, classrooms);
 
     // Save to database
     if (schedule.length > 0) {
-      await prisma.schedule.createMany({
-        data: schedule.map((s) => ({
-          day: s.day,
-          timeRange: s.timeRange,
-          courseId: s.courseId,
-          classroomId: s.classroomId,
-        })),
-      });
+      await createManySchedules(schedule.map((s) => ({
+        day: s.day,
+        timeRange: s.timeRange,
+        courseId: s.courseId,
+        classroomId: s.classroomId,
+      })));
     }
 
     const totalSessions = courses.reduce((sum, c) => sum + c.sessions.length, 0);

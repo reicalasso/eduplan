@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
 import { getCurrentUser, isAdmin } from '@/lib/auth';
+import { getAllSchedules, createSchedule } from '@/lib/turso-helpers';
 
 // GET /api/schedules - Get all schedules
 export async function GET(request: Request) {
@@ -10,53 +10,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ detail: 'Yetkisiz erişim' }, { status: 401 });
     }
 
-    const schedules = await prisma.schedule.findMany({
-      include: {
-        course: {
-          include: {
-            teacher: {
-              select: { id: true, name: true, email: true, faculty: true, department: true },
-            },
-            departments: true,
-          },
-        },
-        classroom: true,
-      },
-      orderBy: [{ day: 'asc' }, { timeRange: 'asc' }],
-    });
-
-    // Transform to match frontend expected format
-    const result = schedules.map((s) => ({
-      id: s.id,
-      day: s.day,
-      time_range: s.timeRange,
-      course_id: s.courseId,
-      classroom_id: s.classroomId,
-      course: s.course
-        ? {
-            id: s.course.id,
-            name: s.course.name,
-            code: s.course.code,
-            teacher_id: s.course.teacherId,
-            total_hours: s.course.totalHours,
-            student_count: s.course.departments?.reduce(
-              (sum: number, d: { studentCount: number }) => sum + (d.studentCount || 0),
-              0
-            ) || 0,
-            teacher: s.course.teacher,
-          }
-        : null,
-      classroom: s.classroom
-        ? {
-            id: s.classroom.id,
-            name: s.classroom.name,
-            type: s.classroom.type,
-            capacity: s.classroom.capacity,
-          }
-        : null,
-    }));
-
-    return NextResponse.json(result);
+    const schedules = await getAllSchedules();
+    return NextResponse.json(schedules);
   } catch (error) {
     console.error('Get schedules error:', error);
     return NextResponse.json(
@@ -77,30 +32,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { day, time_range, course_id, classroom_id } = body;
 
-    const schedule = await prisma.schedule.create({
-      data: {
-        day,
-        timeRange: time_range,
-        courseId: course_id,
-        classroomId: classroom_id,
-      },
-      include: {
-        course: {
-          include: { teacher: { select: { id: true, name: true } } },
-        },
-        classroom: true,
-      },
-    });
-
-    return NextResponse.json({
-      id: schedule.id,
-      day: schedule.day,
-      time_range: schedule.timeRange,
-      course_id: schedule.courseId,
-      classroom_id: schedule.classroomId,
-      course: schedule.course,
-      classroom: schedule.classroom,
-    });
+    const schedule = await createSchedule({ day, time_range, course_id, classroom_id });
+    return NextResponse.json(schedule);
   } catch (error) {
     console.error('Create schedule error:', error);
     return NextResponse.json(
