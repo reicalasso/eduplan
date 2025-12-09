@@ -1,0 +1,273 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { teachersApi } from '@/lib/api';
+import { FACULTIES, getDepartmentsByFaculty } from '@/constants/faculties';
+import { parseWorkingHours, stringifyWorkingHours, TIME_SLOTS, DAYS_TR, WEEK_DAYS } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import type { Teacher, TeacherCreate } from '@/types';
+
+interface TeacherFormProps {
+  teacherId?: number;
+}
+
+export function TeacherForm({ teacherId }: TeacherFormProps) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(!!teacherId);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    faculty: '',
+    department: '',
+  });
+
+  const [workingHours, setWorkingHours] = useState<Record<string, string[]>>({
+    monday: [],
+    tuesday: [],
+    wednesday: [],
+    thursday: [],
+    friday: [],
+  });
+
+  const departments = formData.faculty ? getDepartmentsByFaculty(formData.faculty) : [];
+
+  useEffect(() => {
+    if (teacherId) {
+      const fetchTeacher = async () => {
+        try {
+          const teacher = await teachersApi.getById(teacherId);
+          setFormData({
+            name: teacher.name,
+            email: teacher.email,
+            faculty: teacher.faculty,
+            department: teacher.department,
+          });
+          setWorkingHours(parseWorkingHours(teacher.working_hours));
+        } catch (error) {
+          toast.error('Öğretmen bilgileri yüklenirken bir hata oluştu');
+          router.push('/teachers');
+        } finally {
+          setIsFetching(false);
+        }
+      };
+      fetchTeacher();
+    }
+  }, [teacherId, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const data: TeacherCreate = {
+        ...formData,
+        working_hours: stringifyWorkingHours(workingHours),
+      };
+
+      if (teacherId) {
+        await teachersApi.update(teacherId, data);
+        toast.success('Öğretmen başarıyla güncellendi');
+      } else {
+        await teachersApi.create(data);
+        toast.success('Öğretmen başarıyla eklendi');
+      }
+      router.push('/teachers');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Bir hata oluştu';
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleTimeSlot = (day: string, slot: string) => {
+    setWorkingHours((prev) => {
+      const daySlots = prev[day] || [];
+      if (daySlots.includes(slot)) {
+        return { ...prev, [day]: daySlots.filter((s) => s !== slot) };
+      } else {
+        return { ...prev, [day]: [...daySlots, slot].sort() };
+      }
+    });
+  };
+
+  const selectAllDay = (day: string) => {
+    setWorkingHours((prev) => ({
+      ...prev,
+      [day]: [...TIME_SLOTS],
+    }));
+  };
+
+  const clearDay = (day: string) => {
+    setWorkingHours((prev) => ({
+      ...prev,
+      [day]: [],
+    }));
+  };
+
+  if (isFetching) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Temel Bilgiler</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="name">Ad Soyad</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Öğretmen adı"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">E-posta</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="ornek@universite.edu.tr"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="faculty">Fakülte</Label>
+            <Select
+              value={formData.faculty}
+              onValueChange={(value) =>
+                setFormData({ ...formData, faculty: value, department: '' })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Fakülte seçin" />
+              </SelectTrigger>
+              <SelectContent>
+                {FACULTIES.map((faculty) => (
+                  <SelectItem key={faculty.id} value={faculty.id}>
+                    {faculty.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="department">Bölüm</Label>
+            <Select
+              value={formData.department}
+              onValueChange={(value) => setFormData({ ...formData, department: value })}
+              disabled={!formData.faculty}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Bölüm seçin" />
+              </SelectTrigger>
+              <SelectContent>
+                {departments.map((dept) => (
+                  <SelectItem key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Çalışma Saatleri</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr>
+                  <th className="p-2 text-left">Saat</th>
+                  {WEEK_DAYS.map((day) => (
+                    <th key={day} className="p-2 text-center">
+                      <div>{DAYS_TR[day]}</div>
+                      <div className="mt-1 flex justify-center gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-xs"
+                          onClick={() => selectAllDay(day)}
+                        >
+                          Tümü
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-xs"
+                          onClick={() => clearDay(day)}
+                        >
+                          Temizle
+                        </Button>
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {TIME_SLOTS.map((slot) => (
+                  <tr key={slot} className="border-t">
+                    <td className="p-2 font-medium">{slot}</td>
+                    {WEEK_DAYS.map((day) => (
+                      <td key={`${day}-${slot}`} className="p-2 text-center">
+                        <Checkbox
+                          checked={workingHours[day]?.includes(slot) || false}
+                          onCheckedChange={() => toggleTimeSlot(day, slot)}
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex gap-4">
+        <Button type="submit" disabled={isLoading}>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {teacherId ? 'Güncelle' : 'Kaydet'}
+        </Button>
+        <Button type="button" variant="outline" onClick={() => router.push('/teachers')}>
+          İptal
+        </Button>
+      </div>
+    </form>
+  );
+}

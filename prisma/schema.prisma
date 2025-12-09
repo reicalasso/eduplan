@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ==================== USER ====================
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("teacher") // "admin" | "teacher"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ==================== TEACHER ====================
+model Teacher {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  faculty      String
+  department   String
+  workingHours String   @default("{}") // JSON string
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  courses      Course[]
+}
+
+// ==================== COURSE ====================
+model Course {
+  id          Int                @id @default(autoincrement())
+  name        String
+  code        String             @unique
+  teacherId   Int?
+  teacher     Teacher?           @relation(fields: [teacherId], references: [id])
+  faculty     String
+  level       String             @default("1")
+  category    String             @default("zorunlu") // "zorunlu" | "secmeli"
+  semester    String             @default("güz")
+  ects        Int                @default(3)
+  totalHours  Int                @default(2)
+  isActive    Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  sessions    CourseSession[]
+  departments CourseDepartment[]
+  schedules   Schedule[]
+}
+
+// ==================== COURSE SESSION ====================
+model CourseSession {
+  id       Int    @id @default(autoincrement())
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  type     String @default("teorik") // "teorik" | "lab"
+  hours    Int    @default(2)
+}
+
+// ==================== COURSE DEPARTMENT ====================
+model CourseDepartment {
+  id           Int    @id @default(autoincrement())
+  courseId     Int
+  course       Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  department   String
+  studentCount Int    @default(0)
+}
+
+// ==================== CLASSROOM ====================
+model Classroom {
+  id         Int        @id @default(autoincrement())
+  name       String
+  capacity   Int        @default(30)
+  type       String     @default("teorik") // "teorik" | "lab"
+  faculty    String
+  department String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  schedules  Schedule[]
+
+  @@unique([name, department])
+}
+
+// ==================== SCHEDULE ====================
+model Schedule {
+  id          Int       @id @default(autoincrement())
+  day         String // "Monday", "Tuesday", etc.
+  timeRange   String // "09:00-10:30"
+  courseId    Int
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  classroomId Int
+  classroom   Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+}

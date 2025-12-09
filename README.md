@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PlanEdu - Ders Programi Yonetim Sistemi
 
-## Getting Started
+Modern, kullanici dostu ve yapay zeka destekli bir universite ders programi yonetim sistemi.
 
-First, run the development server:
+**Full-Stack Next.js + TypeScript + Prisma**
+
+## Ozellikler
+
+- **Genetik Algoritma** ile otomatik program olusturma
+- Fakulte, bolum, ogretmen, ders ve sinif yonetimi
+- Rol tabanli yetkilendirme (Admin/Kullanici)
+- Modern, responsive arayuz
+- SQLite veritabani (Prisma ORM)
+- JWT tabanli kimlik dogrulama
+
+## Teknoloji Stack
+
+### Frontend
+- **Next.js 15** (App Router)
+- **TypeScript**
+- **React 19**
+- **Tailwind CSS**
+- **shadcn/ui** components
+- **Lucide React** icons
+
+### Backend (Next.js API Routes)
+- **Prisma ORM** (SQLite)
+- **JWT** authentication
+- **bcryptjs** password hashing
+
+## Kurulum
+
+### Gereksinimler
+
+- Node.js 18+
+- npm veya yarn
+
+### Adimlar
 
 ```bash
+# Bagimliliklari yukle
+npm install
+
+# Veritabanini olustur
+npx prisma migrate dev
+
+# Gelistirme sunucusunu baslat
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Tarayicinizda [http://localhost:3000](http://localhost:3000) adresini acin.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Proje Yapisi
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── api/                # Backend API Routes
+│   │   ├── auth/           # Kimlik dogrulama
+│   │   ├── teachers/       # Ogretmen API
+│   │   ├── courses/        # Ders API
+│   │   ├── classrooms/     # Derslik API
+│   │   ├── schedules/      # Program API
+│   │   ├── scheduler/      # Program olusturucu API
+│   │   └── statistics/     # Istatistik API
+│   ├── (dashboard)/        # Dashboard sayfalari
+│   └── login/              # Giris sayfasi
+├── components/
+│   ├── ui/                 # shadcn/ui bilesenler
+│   ├── layout/             # Sidebar, Header
+│   └── [feature]/          # Ozellik bazli bilesenler
+├── contexts/               # React Context
+├── hooks/                  # Custom hooks
+├── lib/                    # Prisma, Auth, Utils
+├── types/                  # TypeScript tipleri
+└── constants/              # Sabit veriler
+prisma/
+├── schema.prisma           # Veritabani semasi
+└── migrations/             # Veritabani migrationlari
+```
 
-## Learn More
+## Demo Kullanicilar
 
-To learn more about Next.js, take a look at the following resources:
+Ilk giris denemesinde otomatik olusturulur:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Rol       | Kullanici Adi | Sifre      |
+|-----------|---------------|------------|
+| Yonetici  | admin         | admin123   |
+| Ogretmen  | teacher       | teacher123 |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API Endpoints
 
-## Deploy on Vercel
+| Endpoint | Method | Aciklama |
+|----------|--------|----------|
+| `/api/auth/login` | POST | Giris |
+| `/api/auth/me` | GET | Mevcut kullanici |
+| `/api/teachers` | GET, POST | Ogretmenler |
+| `/api/teachers/[id]` | GET, PUT, DELETE | Ogretmen detay |
+| `/api/courses` | GET, POST | Dersler |
+| `/api/courses/[id]` | GET, PUT, DELETE | Ders detay |
+| `/api/classrooms` | GET, POST | Derslikler |
+| `/api/classrooms/[id]` | GET, PUT, DELETE | Derslik detay |
+| `/api/schedules` | GET, POST | Programlar |
+| `/api/schedules/[id]` | DELETE | Program sil |
+| `/api/schedules/days/delete` | POST | Gunlere gore sil |
+| `/api/scheduler/generate` | POST | Program olustur |
+| `/api/scheduler/status` | GET | Durum |
+| `/api/statistics` | GET | Istatistikler |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Lisans
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Apache 2.0
