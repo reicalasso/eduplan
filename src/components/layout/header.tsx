@@ -35,7 +35,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 const shortcuts = [
@@ -83,14 +82,28 @@ const quickLinks = [
 interface HeaderProps {
   onMenuClick?: () => void;
   showMenuButton?: boolean;
+  onSearchClick?: () => void;
 }
 
-export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
+export function Header({ onMenuClick, showMenuButton = false, onSearchClick }: HeaderProps) {
   const { user, logout, isAdmin } = useAuth();
   const pathname = usePathname();
-  const [showSearch, setShowSearch] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+
+  // Handle search click - use command palette
+  const handleSearchClick = () => {
+    if (onSearchClick) {
+      onSearchClick();
+    } else {
+      // Trigger Ctrl+K programmatically
+      const event = new KeyboardEvent('keydown', {
+        key: 'k',
+        ctrlKey: true,
+        bubbles: true,
+      });
+      document.dispatchEvent(event);
+    }
+  };
 
   const getPageTitle = () => {
     const routes: Record<string, string> = {
@@ -132,7 +145,7 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
           <Button 
             variant="outline" 
             className="hidden md:flex items-center gap-2 h-10 px-4 rounded-xl bg-muted/50 border-transparent hover:border-border hover:bg-muted text-muted-foreground"
-            onClick={() => setShowSearch(true)}
+            onClick={handleSearchClick}
           >
             <Search className="h-4 w-4" />
             <span className="text-sm">Hızlı arama...</span>
@@ -146,7 +159,7 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
             variant="ghost" 
             size="icon" 
             className="md:hidden rounded-xl" 
-            onClick={() => setShowSearch(true)}
+            onClick={handleSearchClick}
           >
             <Search className="h-5 w-5" />
           </Button>
@@ -270,59 +283,6 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
           </DropdownMenu>
         </div>
       </header>
-
-      {/* Search Dialog */}
-      <Dialog open={showSearch} onOpenChange={setShowSearch}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Arama</DialogTitle>
-            <DialogDescription>
-              Öğretmen, ders, derslik veya program arayın
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Aramak istediğinizi yazın..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-                autoFocus
-              />
-            </div>
-            <div className="text-sm text-muted-foreground">
-              <p className="font-medium mb-2">Hızlı Erişim</p>
-              <div className="grid gap-1">
-                <Link
-                  href="/teachers"
-                  className="flex items-center gap-2 p-2 rounded-md hover:bg-accent"
-                  onClick={() => setShowSearch(false)}
-                >
-                  <User className="h-4 w-4" />
-                  Öğretmenler
-                </Link>
-                <Link
-                  href="/courses"
-                  className="flex items-center gap-2 p-2 rounded-md hover:bg-accent"
-                  onClick={() => setShowSearch(false)}
-                >
-                  <Search className="h-4 w-4" />
-                  Dersler
-                </Link>
-                <Link
-                  href="/schedules"
-                  className="flex items-center gap-2 p-2 rounded-md hover:bg-accent"
-                  onClick={() => setShowSearch(false)}
-                >
-                  <Search className="h-4 w-4" />
-                  Ders Programı
-                </Link>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Keyboard Shortcuts Dialog */}
       <Dialog open={showShortcuts} onOpenChange={setShowShortcuts}>

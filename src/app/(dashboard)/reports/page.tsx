@@ -26,6 +26,8 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageHeader } from '@/components/ui/page-header';
 import { CardSkeleton } from '@/components/ui/skeleton';
+import { getEntityColors } from '@/lib/design-tokens';
+import { cn } from '@/lib/utils';
 import type { Statistics, SchedulerStatus } from '@/types';
 
 export default function ReportsPage() {
@@ -110,7 +112,7 @@ export default function ReportsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Toplam Öğretmen</CardTitle>
-                <Users className="h-4 w-4 text-blue-600" />
+                <Users className={cn('h-4 w-4', getEntityColors('teachers').icon)} />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats?.teacherCount || 0}</div>
@@ -121,7 +123,7 @@ export default function ReportsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Toplam Ders</CardTitle>
-                <BookOpen className="h-4 w-4 text-green-600" />
+                <BookOpen className={cn('h-4 w-4', getEntityColors('courses').icon)} />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats?.courseCount || 0}</div>
@@ -132,7 +134,7 @@ export default function ReportsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Toplam Derslik</CardTitle>
-                <Building2 className="h-4 w-4 text-purple-600" />
+                <Building2 className={cn('h-4 w-4', getEntityColors('classrooms').icon)} />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats?.classroomCount || 0}</div>
@@ -143,7 +145,7 @@ export default function ReportsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Program Kayıtları</CardTitle>
-                <Calendar className="h-4 w-4 text-orange-600" />
+                <Calendar className={cn('h-4 w-4', getEntityColors('schedules').icon)} />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats?.scheduleCount || 0}</div>
@@ -167,7 +169,7 @@ export default function ReportsPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-blue-500" />
+                        <div className={cn('h-3 w-3 rounded-full', getEntityColors('teachers').dot)} />
                         Öğretmenler
                       </span>
                       <span>{stats?.teacherCount || 0}</span>
@@ -180,7 +182,7 @@ export default function ReportsPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-green-500" />
+                        <div className={cn('h-3 w-3 rounded-full', getEntityColors('courses').dot)} />
                         Dersler
                       </span>
                       <span>{stats?.courseCount || 0}</span>
@@ -194,7 +196,7 @@ export default function ReportsPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-purple-500" />
+                        <div className={cn('h-3 w-3 rounded-full', getEntityColors('classrooms').dot)} />
                         Derslikler
                       </span>
                       <span>{stats?.classroomCount || 0}</span>
@@ -256,13 +258,13 @@ export default function ReportsPage() {
 
                 <div className="grid grid-cols-2 gap-4 pt-4">
                   <div className="text-center p-4 rounded-lg bg-muted/50">
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className={cn('text-2xl font-bold', getEntityColors('courses').text)}>
                       {schedulerStatus?.scheduled_sessions || 0}
                     </p>
                     <p className="text-xs text-muted-foreground">Programlanan</p>
                   </div>
                   <div className="text-center p-4 rounded-lg bg-muted/50">
-                    <p className="text-2xl font-bold text-orange-600">
+                    <p className={cn('text-2xl font-bold', getEntityColors('schedules').text)}>
                       {(schedulerStatus?.total_active_sessions || 0) - (schedulerStatus?.scheduled_sessions || 0)}
                     </p>
                     <p className="text-xs text-muted-foreground">Bekleyen</p>
@@ -328,7 +330,7 @@ export default function ReportsPage() {
                 
                 {(stats?.classroomCount || 0) < (stats?.courseCount || 0) && (
                   <div className="flex items-start gap-3 p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
-                    <Building2 className="h-5 w-5 text-orange-600 mt-0.5" />
+                    <Building2 className={cn('h-5 w-5 mt-0.5', getEntityColors('classrooms').icon)} />
                     <div>
                       <p className="font-medium text-orange-800 dark:text-orange-200">Derslik Yetersizliği</p>
                       <p className="text-sm text-orange-700 dark:text-orange-300">
@@ -340,7 +342,7 @@ export default function ReportsPage() {
 
                 {(schedulerStatus?.completion_percentage || 0) === 100 && (
                   <div className="flex items-start gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                    <TrendingUp className="h-5 w-5 text-green-600 mt-0.5" />
+                    <TrendingUp className={cn('h-5 w-5 mt-0.5', getEntityColors('courses').icon)} />
                     <div>
                       <p className="font-medium text-green-800 dark:text-green-200">Tüm Dersler Programlandı</p>
                       <p className="text-sm text-green-700 dark:text-green-300">
@@ -359,13 +361,13 @@ export default function ReportsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-blue-600" />
+                  <Users className={cn('h-5 w-5', getEntityColors('teachers').icon)} />
                   Öğretmen Analizi
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center py-4">
-                  <p className="text-4xl font-bold text-blue-600">{stats?.teacherCount || 0}</p>
+                  <p className={cn('text-4xl font-bold', getEntityColors('teachers').text)}>{stats?.teacherCount || 0}</p>
                   <p className="text-sm text-muted-foreground">Toplam Öğretmen</p>
                 </div>
                 <div className="space-y-2 text-sm">
@@ -382,13 +384,13 @@ export default function ReportsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-green-600" />
+                  <BookOpen className={cn('h-5 w-5', getEntityColors('courses').icon)} />
                   Ders Analizi
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center py-4">
-                  <p className="text-4xl font-bold text-green-600">{stats?.courseCount || 0}</p>
+                  <p className={cn('text-4xl font-bold', getEntityColors('courses').text)}>{stats?.courseCount || 0}</p>
                   <p className="text-sm text-muted-foreground">Toplam Ders</p>
                 </div>
                 <div className="space-y-2 text-sm">
@@ -403,13 +405,13 @@ export default function ReportsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-purple-600" />
+                  <Building2 className={cn('h-5 w-5', getEntityColors('classrooms').icon)} />
                   Derslik Analizi
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center py-4">
-                  <p className="text-4xl font-bold text-purple-600">{stats?.classroomCount || 0}</p>
+                  <p className={cn('text-4xl font-bold', getEntityColors('classrooms').text)}>{stats?.classroomCount || 0}</p>
                   <p className="text-sm text-muted-foreground">Toplam Derslik</p>
                 </div>
                 <div className="space-y-2 text-sm">

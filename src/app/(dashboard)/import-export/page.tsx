@@ -21,6 +21,8 @@ import * as XLSX from 'xlsx';
 import { useAuth } from '@/contexts/auth-context';
 import { teachersApi, coursesApi, classroomsApi, schedulesApi } from '@/lib/api';
 import { styles } from '@/lib/design-tokens';
+import { getEntityColors, type EntityKey } from '@/lib/design-tokens';
+import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -41,28 +43,28 @@ const exportOptions = [
     id: 'teachers', 
     label: 'Öğretmenler', 
     icon: Users, 
-    color: 'text-blue-600',
+    entity: 'teachers' as EntityKey,
     description: 'Tüm öğretmen verilerini dışa aktar'
   },
   { 
     id: 'courses', 
     label: 'Dersler', 
     icon: BookOpen, 
-    color: 'text-green-600',
+    entity: 'courses' as EntityKey,
     description: 'Tüm ders verilerini dışa aktar'
   },
   { 
     id: 'classrooms', 
     label: 'Derslikler', 
     icon: Building2, 
-    color: 'text-purple-600',
+    entity: 'classrooms' as EntityKey,
     description: 'Tüm derslik verilerini dışa aktar'
   },
   { 
     id: 'schedules', 
     label: 'Ders Programı', 
     icon: Calendar, 
-    color: 'text-orange-600',
+    entity: 'schedules' as EntityKey,
     description: 'Mevcut ders programını dışa aktar'
   },
 ];
@@ -319,7 +321,7 @@ export default function ImportExportPage() {
                 <Card key={option.id} className="hover:shadow-md transition-shadow">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Icon className={`h-5 w-5 ${option.color}`} />
+                      <Icon className={cn('h-5 w-5', getEntityColors(option.entity).icon)} />
                       {option.label}
                     </CardTitle>
                     <CardDescription>{option.description}</CardDescription>
@@ -367,7 +369,7 @@ export default function ImportExportPage() {
                 <Card key={type} className="hover:shadow-md transition-shadow">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Icon className={`h-5 w-5 ${option.color}`} />
+                      <Icon className={cn('h-5 w-5', getEntityColors(option.entity).icon)} />
                       {option.label}
                     </CardTitle>
                     <CardDescription>Excel dosyasından içe aktar</CardDescription>

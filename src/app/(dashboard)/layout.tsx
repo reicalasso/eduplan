@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { ScrollToTop } from '@/components/ui/scroll-to-top';
 import { LoadingBar } from '@/components/ui/loading-bar';
+import { CommandPalette, useCommandPalette } from '@/components/ui/command-palette';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -19,6 +20,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const commandPalette = useCommandPalette();
 
   useEffect(() => {
     if (!isLoading && !token) {
@@ -45,35 +47,36 @@ export default function DashboardLayout({
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl + K for search
-      if (e.ctrlKey && e.key === 'k') {
-        e.preventDefault();
-        // Search is handled in Header
-      }
-      
       // Ctrl + B to toggle sidebar
       if (e.ctrlKey && e.key === 'b') {
         e.preventDefault();
         handleToggleCollapse();
       }
       
-      // G + key for navigation
-      if (e.key === 'g') {
+      // G + key for navigation (vim-style)
+      if (e.key === 'g' && !e.ctrlKey && !e.metaKey && !e.altKey) {
         const handleNavigation = (event: KeyboardEvent) => {
+          if (event.ctrlKey || event.metaKey || event.altKey) return;
+          
           switch (event.key) {
             case 'h':
+              event.preventDefault();
               router.push('/');
               break;
             case 't':
+              event.preventDefault();
               router.push('/teachers');
               break;
             case 'c':
+              event.preventDefault();
               router.push('/courses');
               break;
             case 'r':
+              event.preventDefault();
               router.push('/classrooms');
               break;
             case 's':
+              event.preventDefault();
               router.push('/schedules');
               break;
           }
@@ -139,6 +142,7 @@ export default function DashboardLayout({
         <Header
           onMenuClick={() => setSidebarOpen(true)}
           showMenuButton
+          onSearchClick={commandPalette.open}
         />
         <main className="p-4 md:p-6 lg:p-8">
           {children}
@@ -147,6 +151,9 @@ export default function DashboardLayout({
       
       {/* Scroll to Top Button */}
       <ScrollToTop />
+      
+      {/* Command Palette */}
+      <CommandPalette isOpen={commandPalette.isOpen} onClose={commandPalette.close} />
     </div>
   );
 }

@@ -10,6 +10,7 @@ export const colors = {
       border: 'border-blue-200 dark:border-blue-800',
       gradient: 'from-blue-500 to-blue-600',
       icon: 'text-blue-500',
+      dot: 'bg-blue-500 dark:bg-blue-400',
     },
     courses: {
       bg: 'bg-emerald-100 dark:bg-emerald-900/30',
@@ -17,6 +18,7 @@ export const colors = {
       border: 'border-emerald-200 dark:border-emerald-800',
       gradient: 'from-emerald-500 to-emerald-600',
       icon: 'text-emerald-500',
+      dot: 'bg-emerald-500 dark:bg-emerald-400',
     },
     classrooms: {
       bg: 'bg-violet-100 dark:bg-violet-900/30',
@@ -24,6 +26,7 @@ export const colors = {
       border: 'border-violet-200 dark:border-violet-800',
       gradient: 'from-violet-500 to-violet-600',
       icon: 'text-violet-500',
+      dot: 'bg-violet-500 dark:bg-violet-400',
     },
     schedules: {
       bg: 'bg-amber-100 dark:bg-amber-900/30',
@@ -31,6 +34,7 @@ export const colors = {
       border: 'border-amber-200 dark:border-amber-800',
       gradient: 'from-amber-500 to-orange-600',
       icon: 'text-amber-500',
+      dot: 'bg-amber-500 dark:bg-amber-400',
     },
     scheduler: {
       bg: 'bg-cyan-100 dark:bg-cyan-900/30',
@@ -38,6 +42,7 @@ export const colors = {
       border: 'border-cyan-200 dark:border-cyan-800',
       gradient: 'from-cyan-500 to-cyan-600',
       icon: 'text-cyan-500',
+      dot: 'bg-cyan-500 dark:bg-cyan-400',
     },
     reports: {
       bg: 'bg-indigo-100 dark:bg-indigo-900/30',
@@ -45,6 +50,7 @@ export const colors = {
       border: 'border-indigo-200 dark:border-indigo-800',
       gradient: 'from-indigo-500 to-indigo-600',
       icon: 'text-indigo-500',
+      dot: 'bg-indigo-500 dark:bg-indigo-400',
     },
     settings: {
       bg: 'bg-gray-100 dark:bg-gray-900/30',
@@ -52,6 +58,7 @@ export const colors = {
       border: 'border-gray-200 dark:border-gray-800',
       gradient: 'from-gray-500 to-gray-600',
       icon: 'text-gray-500',
+      dot: 'bg-gray-500 dark:bg-gray-400',
     },
     import: {
       bg: 'bg-teal-100 dark:bg-teal-900/30',
@@ -59,6 +66,7 @@ export const colors = {
       border: 'border-teal-200 dark:border-teal-800',
       gradient: 'from-teal-500 to-teal-600',
       icon: 'text-teal-500',
+      dot: 'bg-teal-500 dark:bg-teal-400',
     },
   },
   // Status colors

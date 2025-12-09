@@ -1,0 +1,366 @@
+'use client';
+
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  Search,
+  Home,
+  Users,
+  BookOpen,
+  Building2,
+  Calendar,
+  Settings,
+  Cog,
+  BarChart3,
+  FileSpreadsheet,
+  Plus,
+  Moon,
+  Sun,
+  LogOut,
+  User,
+  Command,
+  ArrowRight,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/auth-context';
+import { useTheme } from '@/contexts/theme-context';
+import { teachersApi, coursesApi, classroomsApi } from '@/lib/api';
+import { getEntityColors } from '@/lib/design-tokens';
+import type { Teacher, Course, Classroom } from '@/types';
+
+interface CommandPaletteProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+type SearchResult = {
+  id: string;
+  type: 'page' | 'teacher' | 'course' | 'classroom' | 'action';
+  title: string;
+  subtitle?: string;
+  icon: React.ElementType;
+  href?: string;
+  action?: () => void;
+  entity?: 'teachers' | 'courses' | 'classrooms' | 'schedules' | 'scheduler' | 'reports' | 'settings' | 'import';
+};
+
+const pages: SearchResult[] = [
+  { id: 'home', type: 'page', title: 'Ana Sayfa', icon: Home, href: '/', entity: 'scheduler' },
+  { id: 'teachers', type: 'page', title: 'Öğretmenler', subtitle: 'Öğretmen listesi', icon: Users, href: '/teachers', entity: 'teachers' },
+  { id: 'courses', type: 'page', title: 'Dersler', subtitle: 'Ders listesi', icon: BookOpen, href: '/courses', entity: 'courses' },
+  { id: 'classrooms', type: 'page', title: 'Derslikler', subtitle: 'Derslik listesi', icon: Building2, href: '/classrooms', entity: 'classrooms' },
+  { id: 'schedules', type: 'page', title: 'Ders Programı', subtitle: 'Haftalık program', icon: Calendar, href: '/schedules', entity: 'schedules' },
+  { id: 'scheduler', type: 'page', title: 'Program Oluşturucu', subtitle: 'Otomatik program', icon: Cog, href: '/scheduler', entity: 'scheduler' },
+  { id: 'reports', type: 'page', title: 'Raporlar', subtitle: 'İstatistikler', icon: BarChart3, href: '/reports', entity: 'reports' },
+  { id: 'import-export', type: 'page', title: 'İçe/Dışa Aktar', subtitle: 'Excel aktarım', icon: FileSpreadsheet, href: '/import-export', entity: 'import' },
+  { id: 'settings', type: 'page', title: 'Ayarlar', subtitle: 'Sistem ayarları', icon: Settings, href: '/settings', entity: 'settings' },
+  { id: 'profile', type: 'page', title: 'Profil', subtitle: 'Hesap bilgileri', icon: User, href: '/profile', entity: 'settings' },
+];
+
+export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
+  const router = useRouter();
+  const { isAdmin, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const [query, setQuery] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch data when opened
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoading(true);
+      Promise.all([
+        teachersApi.getAll().catch(() => []),
+        coursesApi.getAll().catch(() => []),
+        classroomsApi.getAll().catch(() => []),
+      ]).then(([t, c, cl]) => {
+        setTeachers(t);
+        setCourses(c);
+        setClassrooms(cl);
+        setIsLoading(false);
+      });
+    }
+  }, [isOpen]);
+
+  // Reset on close
+  useEffect(() => {
+    if (!isOpen) {
+      setQuery('');
+      setSelectedIndex(0);
+    }
+  }, [isOpen]);
+
+  // Actions
+  const actions: SearchResult[] = useMemo(() => [
+    ...(isAdmin ? [
+      { id: 'new-teacher', type: 'action' as const, title: 'Yeni Öğretmen Ekle', icon: Plus, href: '/teachers/new', entity: 'teachers' as const },
+      { id: 'new-course', type: 'action' as const, title: 'Yeni Ders Ekle', icon: Plus, href: '/courses/new', entity: 'courses' as const },
+      { id: 'new-classroom', type: 'action' as const, title: 'Yeni Derslik Ekle', icon: Plus, href: '/classrooms/new', entity: 'classrooms' as const },
+    ] : []),
+    { 
+      id: 'toggle-theme', 
+      type: 'action' as const, 
+      title: theme === 'dark' ? 'Açık Tema' : 'Koyu Tema', 
+      icon: theme === 'dark' ? Sun : Moon, 
+      action: () => setTheme(theme === 'dark' ? 'light' : 'dark'),
+      entity: 'settings' as const,
+    },
+    { id: 'logout', type: 'action' as const, title: 'Çıkış Yap', icon: LogOut, action: logout, entity: 'settings' as const },
+  ], [isAdmin, theme, setTheme, logout]);
+
+  // Build search results
+  const results = useMemo(() => {
+    const q = query.toLowerCase().trim();
+    const items: SearchResult[] = [];
+
+    // Filter pages
+    const filteredPages = pages.filter(p => 
+      p.title.toLowerCase().includes(q) || 
+      p.subtitle?.toLowerCase().includes(q)
+    );
+    items.push(...filteredPages);
+
+    // Filter teachers
+    if (q.length > 0) {
+      const filteredTeachers = teachers
+        .filter(t => t.name.toLowerCase().includes(q) || t.email?.toLowerCase().includes(q))
+        .slice(0, 5)
+        .map(t => ({
+          id: `teacher-${t.id}`,
+          type: 'teacher' as const,
+          title: t.name,
+          subtitle: t.email || 'Öğretmen',
+          icon: Users,
+          href: `/teachers/${t.id}/edit`,
+          entity: 'teachers' as const,
+        }));
+      items.push(...filteredTeachers);
+
+      // Filter courses
+      const filteredCourses = courses
+        .filter(c => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q))
+        .slice(0, 5)
+        .map(c => ({
+          id: `course-${c.id}`,
+          type: 'course' as const,
+          title: c.name,
+          subtitle: c.code,
+          icon: BookOpen,
+          href: `/courses/${c.id}/edit`,
+          entity: 'courses' as const,
+        }));
+      items.push(...filteredCourses);
+
+      // Filter classrooms
+      const filteredClassrooms = classrooms
+        .filter(c => c.name.toLowerCase().includes(q))
+        .slice(0, 5)
+        .map(c => ({
+          id: `classroom-${c.id}`,
+          type: 'classroom' as const,
+          title: c.name,
+          subtitle: `Kapasite: ${c.capacity}`,
+          icon: Building2,
+          href: `/classrooms/${c.id}/edit`,
+          entity: 'classrooms' as const,
+        }));
+      items.push(...filteredClassrooms);
+    }
+
+    // Filter actions
+    const filteredActions = actions.filter(a => a.title.toLowerCase().includes(q));
+    items.push(...filteredActions);
+
+    return items;
+  }, [query, teachers, courses, classrooms, actions]);
+
+  // Handle selection
+  const handleSelect = useCallback((item: SearchResult) => {
+    if (item.action) {
+      item.action();
+    } else if (item.href) {
+      router.push(item.href);
+    }
+    onClose();
+  }, [router, onClose]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setSelectedIndex(i => Math.min(i + 1, results.length - 1));
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setSelectedIndex(i => Math.max(i - 1, 0));
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (results[selectedIndex]) {
+            handleSelect(results[selectedIndex]);
+          }
+          break;
+        case 'Escape':
+          e.preventDefault();
+          onClose();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, results, selectedIndex, handleSelect, onClose]);
+
+  // Reset selected index when results change
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [results.length]);
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 z-[80] bg-background/80 backdrop-blur-sm animate-in fade-in-0"
+        onClick={onClose}
+      />
+      
+      {/* Dialog */}
+      <div className="fixed left-1/2 top-[20%] z-[80] w-full max-w-lg -translate-x-1/2 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
+        <div className="overflow-hidden rounded-2xl border bg-card shadow-2xl">
+          {/* Search Input */}
+          <div className="flex items-center border-b px-4">
+            <Search className="h-5 w-5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Sayfa, öğretmen, ders veya derslik ara..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="flex-1 bg-transparent px-4 py-4 text-sm outline-none placeholder:text-muted-foreground"
+              autoFocus
+            />
+            <kbd className="hidden sm:inline-flex h-6 items-center gap-1 rounded border bg-muted px-2 font-mono text-[10px] text-muted-foreground">
+              ESC
+            </kbd>
+          </div>
+
+          {/* Results */}
+          <div className="max-h-[400px] overflow-y-auto p-2">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </div>
+            ) : results.length === 0 ? (
+              <div className="py-8 text-center text-sm text-muted-foreground">
+                Sonuç bulunamadı
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {results.map((item, index) => {
+                  const Icon = item.icon;
+                  const colors = item.entity ? getEntityColors(item.entity) : null;
+                  
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleSelect(item)}
+                      onMouseEnter={() => setSelectedIndex(index)}
+                      className={cn(
+                        'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors',
+                        index === selectedIndex
+                          ? 'bg-primary text-primary-foreground'
+                          : 'hover:bg-muted'
+                      )}
+                    >
+                      <div className={cn(
+                        'flex h-9 w-9 items-center justify-center rounded-lg',
+                        index === selectedIndex
+                          ? 'bg-primary-foreground/20'
+                          : colors?.bg || 'bg-muted'
+                      )}>
+                        <Icon className={cn(
+                          'h-4 w-4',
+                          index === selectedIndex
+                            ? 'text-primary-foreground'
+                            : colors?.icon || 'text-muted-foreground'
+                        )} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{item.title}</p>
+                        {item.subtitle && (
+                          <p className={cn(
+                            'text-xs truncate',
+                            index === selectedIndex
+                              ? 'text-primary-foreground/70'
+                              : 'text-muted-foreground'
+                          )}>
+                            {item.subtitle}
+                          </p>
+                        )}
+                      </div>
+                      <ArrowRight className={cn(
+                        'h-4 w-4 opacity-0 transition-opacity',
+                        index === selectedIndex && 'opacity-100'
+                      )} />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between border-t px-4 py-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1">
+                <kbd className="rounded border bg-muted px-1.5 py-0.5 font-mono">↑↓</kbd>
+                Gezin
+              </span>
+              <span className="flex items-center gap-1">
+                <kbd className="rounded border bg-muted px-1.5 py-0.5 font-mono">↵</kbd>
+                Seç
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Command className="h-3 w-3" />
+              <span>K ile aç</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// Hook for keyboard shortcut
+export function useCommandPalette() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // ⌘+K or Ctrl+K
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsOpen(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  return {
+    isOpen,
+    open: () => setIsOpen(true),
+    close: () => setIsOpen(false),
+    toggle: () => setIsOpen(prev => !prev),
+  };
+}

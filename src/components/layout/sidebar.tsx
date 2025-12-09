@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -53,13 +53,12 @@ export function Sidebar({ isOpen = true, onClose, isCollapsed = false, onToggleC
     return pathname.startsWith(href);
   };
 
-  // Close mobile sidebar on route change
-  useEffect(() => {
-    if (isOpen && onClose) {
+  // Close handler for mobile sidebar
+  const handleLinkClick = () => {
+    if (onClose) {
       onClose();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  };
 
   const NavLink = ({ item, active }: { item: typeof navigation[0]; active: boolean }) => {
     const Icon = item.icon;
@@ -67,6 +66,7 @@ export function Sidebar({ isOpen = true, onClose, isCollapsed = false, onToggleC
     const content = (
       <Link
         href={item.href}
+        onClick={handleLinkClick}
         className={cn(
           'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
           active
@@ -105,7 +105,7 @@ export function Sidebar({ isOpen = true, onClose, isCollapsed = false, onToggleC
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href="/" onClick={handleLinkClick} className="flex items-center gap-3 group">
           <div className="relative flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-lg shadow-primary/30 transition-transform group-hover:scale-105">
             <GraduationCap className="h-5 w-5 text-white" />
             <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-emerald-400 border-2 border-card animate-pulse" />
@@ -211,14 +211,14 @@ export function Sidebar({ isOpen = true, onClose, isCollapsed = false, onToggleC
     <>
       {isOpen && onClose && (
         <div
-          className="fixed inset-0 z-40 bg-background/60 backdrop-blur-md md:hidden animate-fade-in"
+          className="fixed inset-0 z-[60] bg-background/60 backdrop-blur-md md:hidden animate-fade-in"
           onClick={onClose}
         />
       )}
       
       <aside
         className={cn(
-          'fixed left-0 top-0 z-40 h-screen bg-card/95 backdrop-blur-xl border-r border-border/50 transition-all duration-300 ease-out',
+          'fixed left-0 top-0 z-[60] h-screen bg-card/95 backdrop-blur-xl border-r border-border/50 transition-all duration-300 ease-out',
           isCollapsed ? 'w-[72px]' : 'w-72',
           'md:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full'

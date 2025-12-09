@@ -19,7 +19,7 @@ import { ActivityList } from '@/components/ui/activity-list';
 import { StatusSection } from '@/components/ui/status-section';
 import { TipCard, KeyboardShortcut } from '@/components/ui/tip-card';
 import type { Statistics, SchedulerStatus } from '@/types';
-import type { EntityKey, StatusKey } from '@/lib/design-tokens';
+import { getEntityColors, type EntityKey, type StatusKey } from '@/lib/design-tokens';
 
 // Stat cards configuration using entity keys
 const statCardsConfig = [
@@ -159,8 +159,8 @@ export default function DashboardPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/30">
-                    <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <div className={cn(styles.iconContainer, getEntityColors('scheduler').bg)}>
+                    <Zap className={cn('h-5 w-5', getEntityColors('scheduler').icon)} />
                   </div>
                   <div>
                     <h3 className="font-semibold">Hızlı İşlemler</h3>

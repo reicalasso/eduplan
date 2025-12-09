@@ -12,6 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { CardSkeleton } from '@/components/ui/skeleton';
+import { getEntityColors, getStatusColors } from '@/lib/design-tokens';
+import { cn } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -183,11 +185,11 @@ export default function SchedulerPage() {
             <div className="grid gap-4 md:grid-cols-3">
               <div className="rounded-lg border p-4">
                 <p className="text-sm text-muted-foreground">Programlanan</p>
-                <p className="text-2xl font-bold text-green-600">{result.scheduled_count}</p>
+                <p className={cn('text-2xl font-bold', getStatusColors('success').text)}>{result.scheduled_count}</p>
               </div>
               <div className="rounded-lg border p-4">
                 <p className="text-sm text-muted-foreground">Programlanamayan</p>
-                <p className="text-2xl font-bold text-red-600">{result.unscheduled_count}</p>
+                <p className={cn('text-2xl font-bold', getStatusColors('error').text)}>{result.unscheduled_count}</p>
               </div>
               <div className="rounded-lg border p-4">
                 <p className="text-sm text-muted-foreground">Başarı Oranı</p>
