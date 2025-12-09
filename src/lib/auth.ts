@@ -1,7 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { cookies } from 'next/headers';
-import prisma from './prisma';
+import { db, prisma, isTurso } from './db';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this';
 
@@ -45,6 +44,20 @@ export async function getCurrentUser(request: Request) {
 
   const payload = verifyToken(token);
   if (!payload) return null;
+
+  if (isTurso && db) {
+    const result = await db.execute({
+      sql: 'SELECT id, username, role FROM User WHERE id = ?',
+      args: [payload.userId],
+    });
+    if (result.rows.length === 0) return null;
+    const row = result.rows[0];
+    return {
+      id: row.id as number,
+      username: row.username as string,
+      role: row.role as string,
+    };
+  }
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
