@@ -12,9 +12,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 
 const features = [
-  { icon: Zap, text: 'Genetik Algoritma ile Otomatik Planlama' },
-  { icon: Shield, text: 'Güvenli ve Rol Tabanlı Erişim' },
-  { icon: Sparkles, text: 'Modern ve Kullanıcı Dostu Arayüz' },
+  { icon: Zap, text: 'Otomatik Planlama' },
+  { icon: Shield, text: 'Güvenli Erişim' },
+  { icon: Sparkles, text: 'Modern Arayüz' },
 ];
 
 export default function LoginPage() {
@@ -70,8 +70,53 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Branding */}
+    <div className="min-h-[100dvh] flex flex-col lg:flex-row">
+      {/* Mobile Header - Gradient Background */}
+      <div className="lg:hidden bg-gradient-to-br from-primary via-primary/90 to-primary/80 px-6 pt-safe-top pb-8 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-1/2 translate-y-1/2" />
+        </div>
+        
+        <div className="relative z-10">
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20 backdrop-blur shadow-lg">
+              <GraduationCap className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">PlanEdu</h1>
+              <p className="text-xs text-white/70">v2.0.0</p>
+            </div>
+          </div>
+          
+          {/* Welcome Text */}
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-white">
+              Hoş Geldiniz! 👋
+            </h2>
+            <p className="text-sm text-white/80">
+              Ders programı yönetim sistemine giriş yapın
+            </p>
+          </div>
+          
+          {/* Features - Horizontal on Mobile */}
+          <div className="flex gap-4 mt-6 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
+            {features.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <div key={index} className="flex items-center gap-2 text-white/90 bg-white/10 rounded-full px-3 py-1.5 text-xs whitespace-nowrap flex-shrink-0">
+                  <Icon className="h-3.5 w-3.5" />
+                  <span>{feature.text}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-12 flex-col justify-between relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
@@ -105,7 +150,11 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-4">
-            {features.map((feature, index) => {
+            {[
+              { icon: Zap, text: 'Genetik Algoritma ile Otomatik Planlama' },
+              { icon: Shield, text: 'Güvenli ve Rol Tabanlı Erişim' },
+              { icon: Sparkles, text: 'Modern ve Kullanıcı Dostu Arayüz' },
+            ].map((feature, index) => {
               const Icon = feature.icon;
               return (
                 <div key={index} className="flex items-center gap-3 text-white/90">
@@ -124,31 +173,20 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-background">
-        <div className="w-full max-w-md space-y-8">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center">
-            <div className="inline-flex items-center gap-2 mb-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <GraduationCap className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <span className="text-2xl font-bold text-primary">PlanEdu</span>
-            </div>
-            <p className="text-sm text-muted-foreground">Ders Programı Yönetim Sistemi</p>
-          </div>
-
-          <Card className="border-0 shadow-xl">
-            <CardHeader className="space-y-1 pb-4">
+      {/* Login Form */}
+      <div className="flex-1 flex items-start lg:items-center justify-center px-4 sm:px-6 py-6 lg:py-12 bg-background -mt-4 lg:mt-0 rounded-t-3xl lg:rounded-none relative z-10">
+        <div className="w-full max-w-md space-y-6 lg:space-y-8">
+          <Card className="border-0 shadow-xl lg:shadow-2xl">
+            <CardHeader className="space-y-1 pb-4 hidden lg:block">
               <CardTitle className="text-2xl">Hoş Geldiniz</CardTitle>
               <CardDescription>
                 Devam etmek için hesabınıza giriş yapın
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6 lg:pt-0">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="username">Kullanıcı Adı</Label>
+                  <Label htmlFor="username" className="text-sm font-medium">Kullanıcı Adı</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
