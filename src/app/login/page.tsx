@@ -169,7 +169,7 @@ export default function LoginPage() {
         </div>
 
         <div className="relative z-10 text-white/60 text-sm">
-          © 2024 PlanEdu. Tüm hakları saklıdır.
+          © 2025 PlanEdu. Tüm hakları saklıdır.
         </div>
       </div>
 
@@ -195,9 +195,8 @@ export default function LoginPage() {
                       placeholder="Kullanıcı adınızı girin"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 h-12 text-base"
                       required
-                      autoFocus
                       autoComplete="username"
                     />
                   </div>
@@ -212,7 +211,7 @@ export default function LoginPage() {
                       placeholder="Şifrenizi girin"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10"
+                      className="pl-10 pr-10 h-12 text-base"
                       required
                       autoComplete="current-password"
                     />
@@ -251,7 +250,7 @@ export default function LoginPage() {
                   </Button>
                 </div>
 
-                <Button type="submit" className="w-full h-11" disabled={isLoading}>
+                <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -279,29 +278,30 @@ export default function LoginPage() {
                   variant="outline"
                   onClick={() => handleDemoLogin('admin')}
                   disabled={isLoading}
-                  className="h-auto py-3"
+                  className="h-auto py-4 active:scale-[0.98] transition-transform"
                 >
-                  <div className="flex flex-col items-center gap-1">
-                    <Shield className="h-4 w-4 text-primary" />
-                    <span className="text-xs font-medium">Yönetici</span>
+                  <div className="flex flex-col items-center gap-1.5">
+                    <Shield className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-medium">Yönetici</span>
                   </div>
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => handleDemoLogin('teacher')}
                   disabled={isLoading}
-                  className="h-auto py-3"
+                  className="h-auto py-4 active:scale-[0.98] transition-transform"
                 >
-                  <div className="flex flex-col items-center gap-1">
-                    <User className="h-4 w-4 text-green-600" />
-                    <span className="text-xs font-medium">Öğretmen</span>
+                  <div className="flex flex-col items-center gap-1.5">
+                    <User className="h-5 w-5 text-emerald-600" />
+                    <span className="text-sm font-medium">Öğretmen</span>
                   </div>
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          <p className="text-center text-sm text-muted-foreground">
+          {/* Footer - Hidden on mobile, shown on desktop */}
+          <p className="hidden lg:block text-center text-sm text-muted-foreground">
             Giriş yaparak{' '}
             <Button variant="link" className="px-0 h-auto text-sm">
               Kullanım Koşulları
@@ -312,6 +312,13 @@ export default function LoginPage() {
             </Button>
             &apos;nı kabul etmiş olursunuz.
           </p>
+          
+          {/* Mobile Footer */}
+          <div className="lg:hidden text-center pb-safe-bottom">
+            <p className="text-xs text-muted-foreground">
+              © 2025 PlanEdu • Tüm hakları saklıdır
+            </p>
+          </div>
         </div>
       </div>
     </div>

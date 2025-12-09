@@ -199,7 +199,7 @@ export function Sidebar({ isOpen = true, onClose, isCollapsed = false, onToggleC
         {!isCollapsed && (
           <div className="mt-4 px-3 py-3 rounded-xl bg-muted/50">
             <p className="text-[10px] text-muted-foreground text-center">
-              © 2024 PlanEdu • Tüm hakları saklıdır
+              © 2025 PlanEdu • Tüm hakları saklıdır
             </p>
           </div>
         )}

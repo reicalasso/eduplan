@@ -234,26 +234,32 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       />
       
       {/* Dialog */}
-      <div className="fixed left-1/2 top-[20%] z-[80] w-full max-w-lg -translate-x-1/2 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
+      <div className="fixed inset-x-3 top-[10%] sm:inset-x-auto sm:left-1/2 sm:top-[20%] z-[80] w-auto sm:w-full sm:max-w-lg sm:-translate-x-1/2 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
         <div className="overflow-hidden rounded-2xl border bg-card shadow-2xl">
           {/* Search Input */}
-          <div className="flex items-center border-b px-4">
-            <Search className="h-5 w-5 text-muted-foreground" />
+          <div className="flex items-center border-b px-3 sm:px-4">
+            <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
             <input
               type="text"
-              placeholder="Sayfa, öğretmen, ders veya derslik ara..."
+              placeholder="Ara..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="flex-1 bg-transparent px-4 py-4 text-sm outline-none placeholder:text-muted-foreground"
+              className="flex-1 bg-transparent px-3 sm:px-4 py-3 sm:py-4 text-base sm:text-sm outline-none placeholder:text-muted-foreground"
               autoFocus
             />
+            <button 
+              onClick={onClose}
+              className="sm:hidden p-2 text-muted-foreground hover:text-foreground"
+            >
+              ✕
+            </button>
             <kbd className="hidden sm:inline-flex h-6 items-center gap-1 rounded border bg-muted px-2 font-mono text-[10px] text-muted-foreground">
               ESC
             </kbd>
           </div>
 
           {/* Results */}
-          <div className="max-h-[400px] overflow-y-auto p-2">
+          <div className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto p-2">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -274,27 +280,27 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                       onClick={() => handleSelect(item)}
                       onMouseEnter={() => setSelectedIndex(index)}
                       className={cn(
-                        'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors',
+                        'flex w-full items-center gap-3 rounded-xl px-3 py-3 sm:py-2.5 text-left text-sm transition-colors active:scale-[0.98]',
                         index === selectedIndex
                           ? 'bg-primary text-primary-foreground'
                           : 'hover:bg-muted'
                       )}
                     >
                       <div className={cn(
-                        'flex h-9 w-9 items-center justify-center rounded-lg',
+                        'flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-lg flex-shrink-0',
                         index === selectedIndex
                           ? 'bg-primary-foreground/20'
                           : colors?.bg || 'bg-muted'
                       )}>
                         <Icon className={cn(
-                          'h-4 w-4',
+                          'h-5 w-5 sm:h-4 sm:w-4',
                           index === selectedIndex
                             ? 'text-primary-foreground'
                             : colors?.icon || 'text-muted-foreground'
                         )} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{item.title}</p>
+                        <p className="font-medium truncate text-base sm:text-sm">{item.title}</p>
                         {item.subtitle && (
                           <p className={cn(
                             'text-xs truncate',
@@ -307,7 +313,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                         )}
                       </div>
                       <ArrowRight className={cn(
-                        'h-4 w-4 opacity-0 transition-opacity',
+                        'h-4 w-4 opacity-0 transition-opacity flex-shrink-0',
                         index === selectedIndex && 'opacity-100'
                       )} />
                     </button>
@@ -317,8 +323,8 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
             )}
           </div>
 
-          {/* Footer */}
-          <div className="flex items-center justify-between border-t px-4 py-2 text-xs text-muted-foreground">
+          {/* Footer - Hidden on mobile */}
+          <div className="hidden sm:flex items-center justify-between border-t px-4 py-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
                 <kbd className="rounded border bg-muted px-1.5 py-0.5 font-mono">↑↓</kbd>

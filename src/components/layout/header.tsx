@@ -123,25 +123,30 @@ export function Header({ onMenuClick, showMenuButton = false, onSearchClick }: H
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/40 bg-background/80 backdrop-blur-xl px-4 md:px-6">
-        <div className="flex items-center gap-4">
+      <header className="sticky top-0 z-30 flex h-14 md:h-16 items-center justify-between border-b border-border/40 bg-background/80 backdrop-blur-xl px-3 md:px-6">
+        <div className="flex items-center gap-2 md:gap-4">
           {showMenuButton && (
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={onMenuClick} 
-              className="md:hidden rounded-xl"
+              className="md:hidden rounded-xl h-10 w-10 tap-highlight-none"
             >
               <Menu className="h-5 w-5" />
             </Button>
           )}
           
-          {/* Page Title */}
+          {/* Mobile Page Title */}
+          <div className="md:hidden">
+            <h1 className="text-base font-semibold truncate max-w-[150px]">{getPageTitle()}</h1>
+          </div>
+          
+          {/* Desktop Page Title */}
           <div className="hidden md:block">
             <h1 className="text-lg font-semibold">{getPageTitle()}</h1>
           </div>
           
-          {/* Search Button */}
+          {/* Search Button - Desktop */}
           <Button 
             variant="outline" 
             className="hidden md:flex items-center gap-2 h-10 px-4 rounded-xl bg-muted/50 border-transparent hover:border-border hover:bg-muted text-muted-foreground"
@@ -153,28 +158,28 @@ export function Header({ onMenuClick, showMenuButton = false, onSearchClick }: H
               <Command className="h-3 w-3" />K
             </kbd>
           </Button>
-          
-          {/* Mobile search */}
+        </div>
+        
+        <div className="flex items-center gap-1 md:gap-2">
+          {/* Mobile Search */}
           <Button 
             variant="ghost" 
             size="icon" 
-            className="md:hidden rounded-xl" 
+            className="md:hidden rounded-xl h-9 w-9 tap-highlight-none" 
             onClick={handleSearchClick}
           >
             <Search className="h-5 w-5" />
           </Button>
-        </div>
-        
-        <div className="flex items-center gap-2">
+          
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative rounded-xl h-10 w-10">
+              <Button variant="ghost" size="icon" className="relative rounded-xl h-9 w-9 md:h-10 md:w-10 tap-highlight-none">
                 <Bell className="h-5 w-5" />
-                <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-background animate-pulse" />
+                <span className="absolute top-1 right-1 md:top-1.5 md:right-1.5 h-2 w-2 md:h-2.5 md:w-2.5 rounded-full bg-rose-500 ring-2 ring-background animate-pulse" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 rounded-xl p-0 overflow-hidden">
+            <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] md:w-80 max-w-80 rounded-xl p-0 overflow-hidden">
               <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-4 py-3 border-b">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">Bildirimler</p>
@@ -223,12 +228,12 @@ export function Header({ onMenuClick, showMenuButton = false, onSearchClick }: H
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 h-10 px-2 rounded-xl hover:bg-muted">
+              <Button variant="ghost" className="flex items-center gap-2 h-9 md:h-10 px-1.5 md:px-2 rounded-xl hover:bg-muted tap-highlight-none">
                 <div className="relative">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary text-white font-semibold text-sm">
+                  <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-lg gradient-primary text-white font-semibold text-xs md:text-sm">
                     {user?.username?.charAt(0).toUpperCase()}
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-background" />
+                  <div className="absolute -bottom-0.5 -right-0.5 h-2 w-2 md:h-2.5 md:w-2.5 rounded-full bg-emerald-400 ring-2 ring-background" />
                 </div>
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-medium leading-none">{user?.username}</p>

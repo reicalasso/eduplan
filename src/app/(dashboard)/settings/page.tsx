@@ -76,7 +76,7 @@ export default function SettingsPage() {
             <Separator />
             <div className="flex justify-between">
               <span className="text-muted-foreground">Framework</span>
-              <span className="font-medium">Next.js 15</span>
+              <span className="font-medium">Next.js 16</span>
             </div>
             <Separator />
             <div className="flex justify-between">
