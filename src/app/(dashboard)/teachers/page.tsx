@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Plus, Search, ChevronRight, Loader2, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, ChevronRight, Loader2, Pencil, Trash2, Users, Building2, GraduationCap } from 'lucide-react';
 import { useTeachers } from '@/hooks/use-teachers';
 import { useAuth } from '@/contexts/auth-context';
 import { FACULTIES, getDepartmentsByFaculty, getFacultyName, getDepartmentName } from '@/constants/faculties';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { TableSkeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -122,26 +123,37 @@ export default function TeachersPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-8 w-48 bg-muted rounded-lg animate-pulse" />
+            <div className="h-4 w-64 bg-muted rounded animate-pulse" />
+          </div>
+        </div>
+        <TableSkeleton />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Öğretmenler</h1>
-          <p className="text-muted-foreground">
-            Fakülte ve bölümlere göre öğretmenleri görüntüleyin
-          </p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-blue-100 dark:bg-blue-900/30">
+            <Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">Öğretmenler</h1>
+            <p className="text-muted-foreground">
+              {teachers.length} öğretmen kayıtlı
+            </p>
+          </div>
         </div>
         {isAdmin && (
           <Link href="/teachers/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
+            <Button size="lg" className="shadow-lg">
+              <Plus className="mr-2 h-5 w-5" />
               Yeni Öğretmen
             </Button>
           </Link>
@@ -149,47 +161,62 @@ export default function TeachersPage() {
       </div>
 
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm">
-        <button
-          onClick={() => {
-            setSelectedFaculty(null);
-            setSelectedDepartment(null);
-            setSearchTerm('');
-          }}
-          className={`hover:text-primary ${!selectedFaculty ? 'font-semibold text-primary' : 'text-muted-foreground'}`}
-        >
-          Fakülteler
-        </button>
-        {selectedFaculty && (
-          <>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            <button
-              onClick={() => {
-                setSelectedDepartment(null);
-                setSearchTerm('');
-              }}
-              className={`hover:text-primary ${!selectedDepartment ? 'font-semibold text-primary' : 'text-muted-foreground'}`}
-            >
-              {selectedFaculty}
-            </button>
-          </>
-        )}
-        {selectedDepartment && (
-          <>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            <span className="font-semibold text-primary">{selectedDepartment}</span>
-          </>
-        )}
-      </div>
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <button
+            onClick={() => {
+              setSelectedFaculty(null);
+              setSelectedDepartment(null);
+              setSearchTerm('');
+            }}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
+              !selectedFaculty 
+                ? 'bg-primary text-primary-foreground font-medium' 
+                : 'text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            <GraduationCap className="h-4 w-4" />
+            Fakülteler
+          </button>
+          {selectedFaculty && (
+            <>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              <button
+                onClick={() => {
+                  setSelectedDepartment(null);
+                  setSearchTerm('');
+                }}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
+                  !selectedDepartment 
+                    ? 'bg-primary text-primary-foreground font-medium' 
+                    : 'text-muted-foreground hover:bg-muted'
+                }`}
+              >
+                <Building2 className="h-4 w-4" />
+                {selectedFaculty}
+              </button>
+            </>
+          )}
+          {selectedDepartment && (
+            <>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              <span className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground font-medium">
+                <Users className="h-4 w-4" />
+                {selectedDepartment}
+              </span>
+            </>
+          )}
+        </div>
+      </Card>
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder={getPlaceholder()}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
+          className="pl-12 h-12 text-base"
         />
       </div>
 
